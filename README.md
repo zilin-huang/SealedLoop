@@ -12,7 +12,42 @@ Self-improving embodied policies are usually kept or rolled back by a judge that
 
 ## Code
 
-Code coming soon.
+This first release contains the sequential test that decides whether a candidate policy is kept or rolled back. The evaluation records of the paper and the scripts that produce its figures and tables from them, and the run scripts of the manipulation and driving loops, are coming soon.
+
+### Install
+
+```bash
+git clone https://github.com/zilin-huang/SealedLoop.git
+cd SealedLoop
+pip install -e ".[test]"
+pytest
+```
+
+The package depends only on NumPy.
+
+### Keep or roll back
+
+Score the current policy and the candidate on the same evaluation items with a judge that the improvement loop never sees, then read the test:
+
+```python
+from sealedloop import GateConfig, gate_path
+
+cfg = GateConfig(alpha=0.05, budget=100, min_n=10, score_range=(0.0, 1.0))
+reading = gate_path(candidate_scores, current_scores, cfg)
+
+reading.keep        # True: the candidate replaces the current policy
+reading.decision    # accept, reject, unresolved_at_budget or cs_empty
+reading.stopped_at  # number of items used when the test decided
+reading.lo, reading.hi  # confidence sequence for the mean paired gain
+```
+
+The test is a betting confidence sequence on the paired score differences (Waudby-Smith and Ramdas, 2024). It can be read after every item, and the probability of keeping a candidate that is not better than the current policy is at most `alpha`. A candidate is kept only on `accept`; every other decision rolls back. `python examples/keep_or_roll_back.py` runs the test on three synthetic candidates.
+
+| File | Content |
+|---|---|
+| `sealedloop/confseq.py` | Betting confidence sequence for the mean of bounded observations |
+| `sealedloop/gate.py` | The sequential test and its decisions |
+| `sealedloop/power.py` | Power and error rate of the test by simulation |
 
 ## Citation
 
