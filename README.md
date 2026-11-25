@@ -12,7 +12,7 @@ Self-improving embodied policies are usually kept or rolled back by a judge that
 
 ## Code
 
-This first release contains the sequential test that decides whether a candidate policy is kept or rolled back. The evaluation records of the paper and the scripts that produce its figures and tables from them, and the run scripts of the manipulation and driving loops, are coming soon.
+This release contains the sequential test that decides whether a candidate policy is kept or rolled back, the [evaluation records](https://huggingface.co/datasets/zilinhuang/SealedLoop) of the paper, and scripts that recompute every decision and the per-generation figure from them. The scripts for the remaining figures and tables and the run scripts of the manipulation and driving loops are coming soon.
 
 ### Install
 
@@ -48,6 +48,24 @@ The test is a betting confidence sequence on the paired score differences (Waudb
 | `sealedloop/confseq.py` | Betting confidence sequence for the mean of bounded observations |
 | `sealedloop/gate.py` | The sequential test and its decisions |
 | `sealedloop/power.py` | Power and error rate of the test by simulation |
+
+### Evaluation records
+
+The records hold one row per generation of the simulation runs and, for every generation, the per-item paired scores of the current policy and the candidate under the in-loop judge and under the sealed judge (174 generations; 114 on manipulation, 60 on driving), together with the paired drives of the vehicle study.
+
+```bash
+pip install matplotlib huggingface_hub
+hf download zilinhuang/SealedLoop --repo-type dataset --local-dir records
+python scripts/verify_decisions.py     # reruns the test on all 348 recorded decisions
+python scripts/fig_generations.py      # writes figures/fig_generations.pdf
+```
+
+| File | Content |
+|---|---|
+| `scripts/records.py` | Readers for the records and the decision rule of each testbed |
+| `scripts/verify_decisions.py` | Recomputes every keep-or-roll-back decision from the paired scores |
+| `scripts/fig_generations.py` | Gain of every candidate as the in-loop judge reported it and as the sealed judge measured it |
+| `scripts/style.py` | Shared figure style |
 
 ## Citation
 
